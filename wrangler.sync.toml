@@ -1,0 +1,13 @@
+name = "vdrone-tracks-sync"
+main = "worker/sync.ts"
+compatibility_date = "2026-07-10"
+compatibility_flags = ["nodejs_compat"]
+keep_vars = true
+
+[triggers]
+crons = ["17 3 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vdrone-tracks-db"
+database_id = "b2bc1d5a-906f-4e3e-8b35-7706becab049"

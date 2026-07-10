@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.wrangler/
+coverage/
+/tracks/
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# Local proprietary VelociDrone installation media used for protocol verification.
+launcher.app/
+README.txt
