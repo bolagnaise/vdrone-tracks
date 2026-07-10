@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
@@ -8,9 +8,18 @@ const response = {
   page: 1, limit: 50, total: 1, pages: 1, lastSyncAt: "2026-07-10T00:00:00Z",
 };
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe("track board", () => {
+  it("uses the downloader name", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(response), { status: 200 })));
+    render(<App />);
+    expect(screen.getByRole("heading", { level: 1, name: "VDRONE Track Downloader" })).toBeInTheDocument();
+  });
+
   it("renders results and opens accessible details", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(response), { status: 200 })));
     render(<App />);

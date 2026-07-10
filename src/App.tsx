@@ -111,14 +111,14 @@ export default function App() {
 
   return <>
     <header className="site-header">
-      <a className="mark" href="/" aria-label="VDR Track Control home"><span>VDR</span><b>TRACK CONTROL</b></a>
+      <a className="mark" href="/" aria-label="VDRONE Track Downloader home"><span>VDRONE</span><b>TRACK DOWNLOADER</b></a>
       <div className="live-indicator"><i /> PUBLIC FEED</div>
     </header>
     <main>
       <section className="search-deck">
         <div className="deck-copy">
           <p className="eyebrow">Official track directory / Unofficial interface</p>
-          <h1>Find your next <em>line.</em></h1>
+          <h1>VDRONE <em>Track Downloader</em></h1>
         </div>
         <label className="search-box">
           <span>Search track, scenery or online ID</span>
@@ -151,7 +151,7 @@ export default function App() {
         <div><button disabled={page <= 1 || loading} onClick={() => setPage((p) => p - 1)}>← Previous</button><b>{data.page} / {data.pages}</b><button disabled={page >= data.pages || loading} onClick={() => setPage((p) => p + 1)}>Next →</button></div>
       </nav>
     </main>
-    <footer><span>VDR TRACK CONTROL</span><p>Tracks and metadata are served from VelociDrone. Not affiliated with Bat Cave Games.</p><time>{data.lastSyncAt ? `Feed checked ${dateLabel(data.lastSyncAt)}` : "Awaiting feed sync"}</time></footer>
+    <footer><span>VDRONE TRACK DOWNLOADER</span><p>Tracks and metadata are served from VelociDrone. Not affiliated with Bat Cave Games.</p><time>{data.lastSyncAt ? `Feed checked ${dateLabel(data.lastSyncAt)}` : "Awaiting feed sync"}</time></footer>
     {selected && <DetailPanel track={selected} onClose={() => setSelected(null)} />}
   </>;
 }

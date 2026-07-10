@@ -1,4 +1,4 @@
-# VDR Track Control
+# VDRONE Track Downloader
 
 An unofficial, read-only directory for searching and downloading VelociDrone's
 public official tracks. The React interface runs on Cloudflare Pages, metadata is
