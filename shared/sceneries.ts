@@ -13,6 +13,7 @@ export const SCENERIES: Readonly<Record<number, string>> = {
   52: "Apartment", 53: "Office", 54: "OfficeComplex", 55: "NightFactory2",
   56: "Factory", 57: "TechFacility", 100: "PolyPort", 101: "PolyBando",
   102: "City2", 103: "AlpineLake", 104: "RomanCity", 105: "NightFactory3",
+  106: "ChemicalPlant",
 };
 
 export function sceneName(sceneId: number): string {

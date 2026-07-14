@@ -15,7 +15,9 @@ npx wrangler pages dev dist
 ```
 
 Run tests with `npm test`. The legacy standalone catalogue/downloader utility is
-still available as `vd_track_scraper.py`.
+still available as `vd_track_scraper.py`. VelociDrone's catalogue can retain
+historical metadata after a `.trk` file has been removed; the utility reports
+those entries as unavailable and continues downloading the remaining tracks.
 
 ## Cloudflare resources
 

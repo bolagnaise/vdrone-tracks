@@ -24,6 +24,12 @@ LIST_PATH = "/api/get_official_tracks"
 DOWNLOAD_PATH = "/api/download-file"
 DECODE_KEY = "Bat Cave Games"
 DECRYPT_KEY = "Velocidrone"  # Used by other VDRONE data; retained for reference.
+KNOWN_SCENERIES = {
+    # Keep newly released sceneries usable when the installed simulator has not
+    # refreshed settings.db yet.
+    106: "ChemicalPlant",
+}
+TRANSIENT_HTTP_STATUSES = frozenset({408, 429, 500, 502, 503, 504})
 
 
 def catalogue_key(decode_key: str = DECODE_KEY) -> bytes:
@@ -60,6 +66,10 @@ def request(url: str, data: bytes | None = None, content_type: str | None = None
                 urllib.request.Request(url, data=data, headers=headers), timeout=timeout
             ) as response:
                 return response.read()
+        except urllib.error.HTTPError as exc:
+            if exc.code not in TRANSIENT_HTTP_STATUSES or attempt + 1 == retries:
+                raise
+            time.sleep(2 ** attempt)
         except (urllib.error.URLError, TimeoutError):
             if attempt + 1 == retries:
                 raise
@@ -80,8 +90,10 @@ def find_settings_db(explicit: Path | None) -> Path:
 
 def scenery_names(db_path: Path) -> dict[int, str]:
     uri = f"file:{db_path.resolve()}?mode=ro"
+    names = dict(KNOWN_SCENERIES)
     with sqlite3.connect(uri, uri=True) as db:
-        return {int(row[0]): str(row[1]) for row in db.execute("SELECT id, name FROM sceneries")}
+        names.update({int(row[0]): str(row[1]) for row in db.execute("SELECT id, name FROM sceneries")})
+    return names
 
 
 def safe_component(value: str) -> str:
@@ -94,6 +106,12 @@ def remote_path(track: dict, scenes: dict[int, str]) -> str:
     if scene_id not in scenes:
         raise KeyError(f"unknown scenery ID {scene_id}")
     return f"downloads/scenes/{scenes[scene_id]}/official_tracks/{track['track_name']}.trk"
+
+
+def download_result_code(requested: int, completed: int, skipped: int,
+                         unavailable: int, failed: int) -> int:
+    all_requested_unavailable = requested > 0 and unavailable == requested and not (completed or skipped)
+    return 1 if failed or all_requested_unavailable else 0
 
 
 def main() -> int:
@@ -126,7 +144,7 @@ def main() -> int:
         return 0
 
     scenes = scenery_names(find_settings_db(args.settings_db))
-    completed = skipped = failed = 0
+    completed = skipped = unavailable = failed = 0
     for index, track in enumerate(tracks, 1):
         try:
             path = remote_path(track, scenes)
@@ -148,12 +166,27 @@ def main() -> int:
             print(f"[{index}/{len(tracks)}] saved {local} ({len(content)} bytes)")
             if args.delay:
                 time.sleep(args.delay)
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                unavailable += 1
+                print(
+                    f"[{index}/{len(tracks)}] UNAVAILABLE track {track.get('track_id')}: "
+                    "file is no longer stored by VelociDrone",
+                    file=sys.stderr,
+                )
+            else:
+                failed += 1
+                print(f"[{index}/{len(tracks)}] FAILED track {track.get('track_id')}: {exc}", file=sys.stderr)
         except Exception as exc:
             failed += 1
             print(f"[{index}/{len(tracks)}] FAILED track {track.get('track_id')}: {exc}", file=sys.stderr)
 
-    print(f"Done: {completed} downloaded, {skipped} skipped, {failed} failed.", file=sys.stderr)
-    return 1 if failed else 0
+    print(
+        f"Done: {completed} downloaded, {skipped} skipped, "
+        f"{unavailable} unavailable upstream, {failed} failed.",
+        file=sys.stderr,
+    )
+    return download_result_code(len(tracks), completed, skipped, unavailable, failed)
 
 
 if __name__ == "__main__":

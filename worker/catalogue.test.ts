@@ -15,5 +15,6 @@ describe("catalogue protocol", () => {
   it("rejects duplicate IDs", () => expect(() => validateTracks([track, track])).toThrow(/Duplicate/));
   it("rejects malformed records", () => expect(() => validateTracks([{ ...track, track_name: "" }])).toThrow(/Invalid/));
   it("maps known scenery and trusted path", () => expect(normalizedTrack(track, "now")).toMatchObject({ sceneName: "Countryside", remotePath: "downloads/scenes/Countryside/official_tracks/Test Line.trk" }));
+  it("maps the Chemical Plant scenery", () => expect(normalizedTrack({ ...track, scene_id: 106 }, "now")).toMatchObject({ sceneName: "ChemicalPlant", remotePath: "downloads/scenes/ChemicalPlant/official_tracks/Test Line.trk" }));
   it("leaves unknown scenery unavailable", () => expect(normalizedTrack({ ...track, scene_id: 999 }, "now")).toMatchObject({ sceneName: "Scene #999", remotePath: null }));
 });
