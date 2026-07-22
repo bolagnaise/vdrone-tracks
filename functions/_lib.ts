@@ -17,6 +17,7 @@ export interface TrackRow {
 
 export function toTrack(row: TrackRow): Track {
   return {
+    source: "official",
     id: row.id,
     name: row.name,
     sceneId: row.scene_id,

@@ -1,13 +1,15 @@
-import type { TrackListResponse } from "../shared/types";
+import type { TrackListResponse, TrackSource } from "../shared/types";
 
-export async function fetchTracks(params: URLSearchParams, signal?: AbortSignal): Promise<TrackListResponse> {
-  const response = await fetch(`/api/tracks?${params}`, { signal });
+export async function fetchTracks(source: TrackSource, params: URLSearchParams, signal?: AbortSignal): Promise<TrackListResponse> {
+  const endpoint = source === "community" ? "/api/community-tracks" : "/api/tracks";
+  const response = await fetch(`${endpoint}?${params}`, { signal });
   if (!response.ok) throw new Error("The track board could not be loaded.");
   return response.json() as Promise<TrackListResponse>;
 }
 
-export async function downloadTrack(id: number, name: string): Promise<void> {
-  const response = await fetch(`/api/tracks/${id}/download`);
+export async function downloadTrack(source: TrackSource, id: number, name: string): Promise<void> {
+  const endpoint = source === "community" ? "/api/community-tracks" : "/api/tracks";
+  const response = await fetch(`${endpoint}/${id}/download`);
   if (!response.ok) {
     let message = "The track could not be downloaded.";
     try { message = (await response.json() as { error?: string }).error ?? message; } catch { /* use fallback */ }
